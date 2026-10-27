@@ -11,7 +11,7 @@ instructor grade it.
 
 Two small functions are left for YOU to implement (search for ``TODO``):
 
-  * ``parse_gcloud_config`` — pull the account + project out of ``gcloud`` JSON output.
+  * ``parse_gcloud_config`` — pull ohe account + project out of ``gcloud`` JSON output.
   * ``parse_repo_slug``     — turn a git remote URL into ``owner/repo``.
 
 Everything else is provided. These are pure functions (input string in, value out),
@@ -48,10 +48,17 @@ def parse_gcloud_config(raw: str) -> dict:
     Args:
         raw: the raw stdout string from the gcloud command (may be empty).
     """
-    # TODO: parse `raw` as JSON and return {"account": ..., "project": ...}
-    #       from the "core" section. Return empty strings if raw is empty or a
-    #       field is missing.
-    raise NotImplementedError("Phase 0: implement parse_gcloud_config()")
+
+    if not raw:
+        return {"account": "", "project": ""}
+
+    config = json.loads(raw)
+    core = config.get("core", {})
+
+    return {
+        "account": core.get("account", "") or "",
+        "project": core.get("project", "") or "",
+    }
 
 
 def parse_repo_slug(remote_url: str) -> str:
@@ -67,9 +74,21 @@ def parse_repo_slug(remote_url: str) -> str:
     Args:
         remote_url: output of ``git remote get-url origin`` (may be empty).
     """
-    # TODO: return "owner/repo" for both the HTTPS and SSH forms shown above.
-    #       Strip any trailing ".git". Return "" if not a github.com URL.
-    raise NotImplementedError("Phase 0: implement parse_repo_slug()")
+
+    if not remote_url:
+        return ""
+
+    if remote_url.startswith("https://github.com/"):
+        remote_url = remote_url.removeprefix("https://github.com/")
+    elif remote_url.startswith("git@github.com:"):
+        remote_url = remote_url.removeprefix("git@github.com:")
+    else:
+        return ""
+
+    return remote_url.removesuffix(".git")
+
+
+    
 
 
 # --------------------------------------------------------------------------- #
